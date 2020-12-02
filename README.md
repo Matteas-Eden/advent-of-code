@@ -1,2 +1,2 @@
-# advent-of-code
-A collection of solutions for the yearly Advent of Code
+# Advent of Code
+A collection of my solutions for the yearly Advent of Code event hosted at www.adventofcode.com.
