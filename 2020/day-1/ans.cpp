@@ -23,7 +23,7 @@ int loadDataFromFile(string path, vector<int> &vals) {
   return 0;
 }
 
-int findSolution(const vector<int> &vals) {
+int findSolutionPart1(const vector<int> &vals) {
   int firstNum, secondNum;
   /* Brute force approach to solving problem */
   for (int v1 : vals) {
@@ -42,22 +42,58 @@ int findSolution(const vector<int> &vals) {
 
 }
 
-int main(int argc, char ** argv) {
+int findSolutionPart2(const vector<int> vals) {
+  int firstNum, secondNum, thirdNum;
+  /* Brute force approach to solving problem */
+  for (int v1 : vals) {
+    firstNum = v1;
+    for (int v2 : vals) {
+      secondNum = v2;
+      for (int v3 : vals) {
+        if (v3 + v2 + v1 == 2020) {
+            return v1 * v2 * v3;
+        }
+      }
+    }
+  }
 
-  vector<int> vals;
-  clock_t start, stop;
+  return -1;
+}
 
-  loadDataFromFile("input", vals);
-
-  start = clock();
-  int result = findSolution(vals);
-  stop = clock();
-
+void printSolutionsAndTiming(int result, clock_t start, clock_t stop) {
   if (result == -1) cout << "No solution found" << endl;
   else {
     cout << "Solution: " << result << endl;
     double totalTime = (stop - start);
     cout << "Time elapsed to reach solution: " << totalTime / CLOCKS_PER_SEC << "s" << endl;
   }
+}
+
+int main(int argc, char ** argv) {
+
+  cout << "## Day 1 of Advent of Code ##" << endl;
+
+  vector<int> vals;
+  int result;
+  clock_t start, stop;
+
+  loadDataFromFile("input", vals);
+
+  /* Part 1 of Day 1 Challenge */
+  start = clock();
+  result = findSolutionPart1(vals);
+  stop = clock();
+
+  cout << "-- Part 1 --" << endl;
+  printSolutionsAndTiming(result, start, stop);
+
+  /* Part 2 of Day 1 Challenge */
+  start = clock();
+  result = findSolutionPart2(vals);
+  stop = clock();
+
+  cout << "-- Part 2 --" << endl;
+  printSolutionsAndTiming(result, start, stop);
+
 }
 
