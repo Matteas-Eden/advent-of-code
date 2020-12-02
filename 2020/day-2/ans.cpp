@@ -14,22 +14,11 @@ int loadDataFromFile(string path, vector<vector<string>> &vals) {
   /* Load values from file into memory */
   if (inFile.is_open()){
     while (getline(inFile, line)){
-      /* Need
-       *  - min
-       *  - max
-       *  - target char
-       *  - password string
-       * */
-      string min = line.substr(0, line.find("-"));
-      string max = line.substr(line.find("-") + 1, line.find(" ") - line.find("-"));
-      string target = line.substr(line.find(":") - 1, 1);
+      string firstNum = line.substr(0, line.find("-"));
+      string secondNum = line.substr(line.find("-") + 1, line.find(" ") - line.find("-"));
+      string targetChar = line.substr(line.find(":") - 1, 1);
       string password = line.substr(line.find(":") + 2);
-      /*cout << min << endl;
-      cout << max << endl;
-      cout << target << endl;
-      cout << password << endl;
-      return 1;*/
-      vals.push_back({min, max, target, password});
+      vals.push_back({firstNum, secondNum, targetChar, password});
     }
     inFile.close();
   }
@@ -56,6 +45,23 @@ int findSolutionPart1(vector<vector<string>> vals) {
 
 }
 
+int findSolutionPart2(vector<vector<string>> vals) {
+
+  int numValid = 0;
+  int posOne, posTwo;
+
+  for (vector<string> v : vals) {
+    // Convert from 1-based indexing to 0-based
+    posOne = stoi(v.at(0)) - 1;
+    posTwo = stoi(v.at(1)) - 1;
+
+    if ((v.at(3)[posOne] == v.at(2)[0]) != (v.at(3)[posTwo] == v.at(2)[0])) numValid++;
+  }
+
+  return numValid;
+
+}
+
 void printSolutionsAndTiming(int result, clock_t start, clock_t stop) {
   if (result == -1) cout << "No solution found" << endl;
   else {
@@ -75,11 +81,18 @@ int main(int argc, char ** argv) {
 
   loadDataFromFile("input", vals);
 
+  cout << "-- Part 1 --" << endl;
   start = clock();
   result = findSolutionPart1(vals);
   stop = clock();
 
-  cout << "-- Part 1 --" << endl;
+  printSolutionsAndTiming(result, start, stop);
+
+  cout << "-- Part 2 --" << endl;
+  start = clock();
+  result = findSolutionPart2(vals);
+  stop = clock();
+
   printSolutionsAndTiming(result, start, stop);
 
 }
