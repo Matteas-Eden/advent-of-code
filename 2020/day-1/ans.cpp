@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <ctime>
 
 using namespace std;
 
@@ -44,12 +45,19 @@ int findSolution(const vector<int> &vals) {
 int main(int argc, char ** argv) {
 
   vector<int> vals;
+  clock_t start, stop;
 
   loadDataFromFile("input", vals);
 
+  start = clock();
   int result = findSolution(vals);
-  if (result == -1) cout << "No solution found" << endl;
-  else cout << "Solution: " << result << endl;
+  stop = clock();
 
+  if (result == -1) cout << "No solution found" << endl;
+  else {
+    cout << "Solution: " << result << endl;
+    double totalTime = (stop - start);
+    cout << "Time elapsed to reach solution: " << totalTime / CLOCKS_PER_SEC << "s" << endl;
+  }
 }
 
