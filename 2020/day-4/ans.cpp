@@ -136,7 +136,7 @@ int findSolutionPart2(const string &path, const set<string> &fields, const set<s
         if (numFields == numRequired) {
           valid++;
           cout << "# Passport valid" << endl;
-        } else cout << "! Passport invalid -- Missing " << numRequired-numFields << " fields" << endl;
+        } else cout << "! Passport invalid -- " << numRequired-numFields << " bad/missing fields" << endl;
         numFields = 0;
         continue;
       }
@@ -151,9 +151,12 @@ int findSolutionPart2(const string &path, const set<string> &fields, const set<s
           continue;
         }
         // Count valid fields
-        if (fields.find(pair.at(0)) != fields.end() && validateField(pair.at(0), pair.at(1))) {
-          numFields++;
+        if (fields.find(pair.at(0)) != fields.end()) {
           cout << "-> Found in list!" << endl;
+          if (validateField(pair.at(0), pair.at(1))) {
+            cout << "--> Valid!" << endl;
+            numFields++;
+          } else cout << "--> Invalid!" << endl;
         }
       }
     }
