@@ -70,8 +70,8 @@ int getValFromSeq(const string &s, bool row, bool verbose) {
   return range.at(0);
 }
 
-int findSolutionPart1(const vector<string> &vals, bool verbose) {
-  
+vector<int> getIDSeats(const vector<string> &vals, bool verbose) {
+
   vector<int> idSeats;
   vector<string> parts;
   int row = 0, col = 0;
@@ -84,10 +84,33 @@ int findSolutionPart1(const vector<string> &vals, bool verbose) {
     idSeats.push_back(calculateSeatID(row,col));
   }
 
+  return idSeats;
+}
+
+int findSolutionPart1(const vector<string> &vals, bool verbose) {
+  
+  vector<int> idSeats = getIDSeats(vals, verbose);
+
   // Find highest
   sort(idSeats.begin(), idSeats.end(), [](int a, int b) { return a > b; });
 
   return idSeats.at(0);
+
+}
+
+int findSolutionPart2(const vector<string> &vals, bool verbose) {
+  
+  vector<int> idSeats = getIDSeats(vals, verbose);
+
+  // Need to find first missing number in sequence
+  sort(idSeats.begin(), idSeats.end(), [](int a, int b) { return a < b; });
+
+  for (unsigned int i = 1; i < idSeats.size() - 1; i++) {
+    if (verbose) cout << "Comparing " << idSeats.at(i-1) << " and " << idSeats.at(i) << endl;
+    if (idSeats.at(i) - idSeats.at(i-1) != 1) return idSeats.at(i) - 1;
+  }
+
+  return -1;
 
 }
 
@@ -108,15 +131,13 @@ int main(int argc, char ** argv) {
 
   printSolutionsAndTiming(result, start, stop);
 
-  /* 
   cout << "-- Part 2 --" << endl;
   
   start = clock();
-  result = findSolutionPart2(vals, false, 1, 1);
+  result = findSolutionPart2(vals, false);
   stop = clock();
 
   printSolutionsAndTiming(result, start, stop);
-  */
 
 }
 
