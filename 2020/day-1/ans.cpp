@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <ctime>
 
 using namespace std;
@@ -24,21 +25,20 @@ int loadDataFromFile(string path, vector<int> &vals) {
 }
 
 int findSolutionPart1(const vector<int> &vals) {
-  int firstNum, secondNum;
-  /* Brute force approach to solving problem */
-  for (int v1 : vals) {
-    firstNum = v1;
-    // cout << v1 << endl;
-    for (int v2 : vals) {
-      secondNum = v2;
-      // cout << v1 + v2 << endl;
-      if (v2 + v1 == 2020) {
-          return v1 * v2;
-      }
-    }
+  vector<int> sorted(vals);
+
+  sort(sorted.begin(), sorted.end(), [](int a, int b) { return a < b; });
+
+  vector<int>::const_iterator v1 = sorted.begin();
+  vector<int>::const_iterator v2 = sorted.end() - 1;
+
+  while (*v1 + *v2 != 2020 && v1 != v2) {
+    // cout << "V1: " << *v1 << " V2: " << *v2 << endl;
+    if (*v1 + *v2 > 2020) v2--;
+    if (*v1 + *v2 < 2020) v1++;
   }
 
-  return -1;
+  return (*v1 + *v2 == 2020) ? *v1 * *v2 : -1;
 
 }
 
