@@ -46,6 +46,19 @@ bool checkForSummingPair(const vector<int64_t> &vals, int64_t target) {
 
 }
 
+int64_t getSum(vector<int64_t>::iterator front, vector<int64_t>::iterator back, bool verbose = false) {
+  int64_t sum = 0;
+  vector<int64_t>::iterator it = front;
+  while (it != back) {
+    if (verbose) cout << "VAL: " << *it << " || SUM: " << sum << endl;
+    sum += *it;
+    it++;
+  }
+  sum += *it;
+  if (verbose) cout << "VAL: " << *it << " || SUM: " << sum << endl;
+  return sum;
+}
+
 int64_t findSolutionPart1(const vector<int64_t> &vals, int preamble, bool verbose = false) {
 
   vector<int64_t> sliced;
@@ -64,6 +77,60 @@ int64_t findSolutionPart1(const vector<int64_t> &vals, int preamble, bool verbos
   }
 
   return (k == vals.size()) ? -1 : vals.at(k);
+
+}
+
+int64_t findSolutionPart2(const vector<int64_t> &vals, int preamble, int minNumberOfVals, bool verbose = false) {
+
+  int64_t invalidNumber = findSolutionPart1(vals, preamble, verbose);
+  if (verbose) cout << "Invalid Number: " << invalidNumber << endl;
+
+  /*
+   * - Slice the list up until the invalid number (surely we don't count values
+   * past it?)
+   * - Pointer at front of list, pointer offset from that one by 1 (to maintain
+   *   minimum values)
+   * - Move second pointer through this subsection until either
+   *   1) reached the end
+   *   2) summed values to target
+   * - Presuming (1), move first pointer forward one step, then reset second
+   *   pointer to offset from first pointer
+   * - Repeat until we get (2) otherwise claim there is no solution
+   * - Yes the time complexity will be horrible
+   * */
+
+  vector<int64_t> sliced = vector<int64_t>(vals.begin(), find(vals.begin(), vals.end(), invalidNumber));
+  vector<int64_t>::iterator front = sliced.begin();
+  vector<int64_t>::iterator back;
+  int64_t sum;
+  int64_t max = 0, min = 0;
+
+  if (verbose) cout << "TARGET: " << invalidNumber << endl;
+
+  while (front != sliced.end()) {
+    back = front + minNumberOfVals - 1;
+    sum = getSum(front, back);
+    while (back != sliced.end()) {
+      if (verbose) cout << "F: " << *front << "|| B: " << *back << "|| SUM: " << sum << endl;
+      if (sum == invalidNumber) {
+        min = *(min_element(front, back + 1));
+        max = *(max_element(front, back + 1));
+        if (verbose) {
+          cout << "=========================" << endl;
+          cout << "TARGET: " << invalidNumber << endl;
+          sum = getSum(front, back, true);
+          cout << "=========================" << endl;
+          cout << "MIN: " << min << " || MAX: " << max << " || SUM: " << min + max << endl;
+        }
+        return min + max;
+      }
+      back++;
+      sum += *back;
+    }
+    front++;
+  }
+
+  return -1;
 
 }
 
@@ -86,22 +153,21 @@ int main(int argc, char ** argv) {
   int preamble = (argc > 1) ? stoi(argv[1]) : 25;
 
   loadDataFromFile("input", vals);
-  
+
   cout << "-- Part 1 --" << endl;
   start = clock();
-  result = findSolutionPart1(vals, preamble, true);
+  result = findSolutionPart1(vals, preamble, false);
   stop = clock();
 
   printSolutionsAndTiming(result, start, stop);
-
-  /*
+  
   cout << "-- Part 2 --" << endl;
   
   start = clock();
-  result = findSolutionPart2(vals, false);
+  result = findSolutionPart2(vals, preamble, 2, false);
   stop = clock();
 
   printSolutionsAndTiming(result, start, stop);
-  */
+  
 }
 
