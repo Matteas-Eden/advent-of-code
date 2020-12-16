@@ -40,11 +40,11 @@ void printSeatingPlan(const vector<vector<char>> &plan) {
   cout << endl;
 }
 
-int getAdjacentOccupiedSeats(const vector<vector<char>> &plan, int row, int col) {
+int getAdjacentOccupiedSeats(const vector<vector<char>> &plan, int row, int col, bool verbose = false) {
 
   int count = 0;
 
-  // cout << "Check around: (" << row << ", " << col << ")" << endl;
+  if (verbose) cout << "Check around: (" << row << ", " << col << ")" << endl;
 
   for (int x = -1; x < 2; x++) {
     for (int y = -1; y < 2; y++) {
@@ -59,7 +59,7 @@ int getAdjacentOccupiedSeats(const vector<vector<char>> &plan, int row, int col)
       // Don't consider centre
       if (x == 0 && y == 0) continue;
 
-      // cout << "- Checking: R=" << row+x << " C=" << col+y << endl; 
+      if (verbose) cout << "- Checking: R=" << row+x << " C=" << col+y << endl; 
       if (plan[row + x][col + y] == '#') count++;
     }
   }
@@ -68,10 +68,49 @@ int getAdjacentOccupiedSeats(const vector<vector<char>> &plan, int row, int col)
 
 }
 
-/*
- * Empty seats with no adjacent occupied seats becomes occupied
- * Occupied seats with at least four adjacent occupied seats becomes occupied
- * */
+char getVisibleSeat(const vector<vector<char>> &plan, int xstart, int ystart, int xoffset, int yoffset) {
+
+  int x = xstart;
+  int y = ystart;
+
+  while (x >= 0 && y >= 0 && x <= plan.size() - 1 && y <= plan.at(0).size() - 1) {
+    if (plan[x][y] != '.') return plan[x][y];
+    x += xoffset;
+    y += yoffset;
+  }
+
+  return '.';
+
+}
+
+int getVisibleOccupiedSeats(const vector<vector<char>> &plan, int row, int col, bool verbose = false) {
+
+  int count = 0;
+
+  if (verbose) cout << "Check around: (" << row << ", " << col << ")" << endl;
+
+  for (int x = -1; x < 2; x++) {
+    for (int y = -1; y < 2; y++) {
+      // Top row
+      if (row == 0 && x == -1) continue;
+      // Bottom row
+      if (row == plan.size() - 1 && x == 1) continue;
+      // Left edge
+      if (col == 0 && y == -1) continue;
+      // Right edge
+      if (col == plan.at(0).size() - 1 && y == 1) continue;
+      // Don't consider centre
+      if (x == 0 && y == 0) continue;
+
+      if (verbose) cout << "- Checking: R=" << row+x << " C=" << col+y << endl; 
+      if (getVisibleSeat(plan, row + x, col + y, x, y) == '#') count++;
+    }
+  }
+
+  return count;
+
+}
+
 vector<vector<char>> applyRules(const vector<vector<char>> &plan) {
 
   vector<vector<char>> result;
@@ -80,10 +119,38 @@ vector<vector<char>> applyRules(const vector<vector<char>> &plan) {
   for (unsigned int i = 0; i < plan.size(); i++) {
     temp = vector<char>();
     for (unsigned int j = 0; j < plan[i].size(); j++) {
+      // Empty seats with no adjacent occupied seats become occupied
       if (getAdjacentOccupiedSeats(plan, i, j) == 0 && plan[i][j] == 'L') {
         temp.push_back('#');
         continue;
-      } else if (getAdjacentOccupiedSeats(plan, i, j) >= 4 && plan[i][j] == '#') {
+      } // Occupied seats with at least four adjacent occupied seats become occupied
+      else if (getAdjacentOccupiedSeats(plan, i, j) >= 4 && plan[i][j] == '#') {
+        temp.push_back('L');
+        continue;
+      }
+      temp.push_back(plan[i][j]);
+    }
+    result.push_back(temp);
+  }
+
+  return result;
+
+}
+
+vector<vector<char>> applyNewRules(const vector<vector<char>> &plan) {
+
+  vector<vector<char>> result;
+  vector<char> temp;
+
+  for (unsigned int i = 0; i < plan.size(); i++) {
+    temp = vector<char>();
+    for (unsigned int j = 0; j < plan[i].size(); j++) {
+      // Empty seats with no adjacent occupied seats become occupied
+      if (getVisibleOccupiedSeats(plan, i, j) == 0 && plan[i][j] == 'L') {
+        temp.push_back('#');
+        continue;
+      } // Occupied seats with at least four adjacent occupied seats become occupied
+      else if (getVisibleOccupiedSeats(plan, i, j) >= 5 && plan[i][j] == '#') {
         temp.push_back('L');
         continue;
       }
@@ -107,11 +174,11 @@ int countSeats(const vector<vector<char>> &plan, char seat) {
 }
 
 /*
- * Map of characters
+ * Map of characters (2D vec)
  * Create a working copy and a 'last run' copy
  * Iterate through all of it
  * Apply rules
- * Update a the 'last run' with the working copy
+ * Update the 'last run' with the working copy
  * Repeat until working copy == last run
  * Calculate numSeats
  * return numSeats
@@ -125,6 +192,21 @@ int findSolutionPart1(const vector<vector<char>> &vals, bool verbose = false) {
   while (curr != last) {
     if (curr.size()) last = curr;
     curr = applyRules(last);
+    if (verbose) printSeatingPlan(curr);
+  }
+
+  return countSeats(last, '#'); 
+}
+
+int findSolutionPart2(const vector<vector<char>> &vals, bool verbose = false) {
+  vector<vector<char>> last(vals);
+  vector<vector<char>> curr;
+
+  if (verbose) printSeatingPlan(last);
+
+  while (curr != last) {
+    if (curr.size()) last = curr;
+    curr = applyNewRules(last);
     if (verbose) printSeatingPlan(curr);
   }
 
@@ -157,14 +239,12 @@ int main(int argc, char ** argv) {
 
   printSolutionsAndTiming(result, start, stop);
   
-  /*
   cout << "-- Part 2 --" << endl;
   
   start = clock();
-  result = findSolutionPart2(vals, false);
+  result = findSolutionPart2(vals);
   stop = clock();
 
   printSolutionsAndTiming(result, start, stop);
-  */
 }
 
